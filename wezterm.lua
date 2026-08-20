@@ -113,7 +113,15 @@ config.font_size = 12
 config.freetype_load_target = 'Light'
 config.front_end = 'WebGpu'
 config.webgpu_power_preference = 'HighPerformance'
+config.window_decorations = 'INTEGRATED_BUTTONS | RESIZE'
+config.integrated_title_buttons = { 'Hide', 'Maximize' }
+config.window_frame = {
+  font = wezterm.font 'CaskaydiaCove Nerd Font',
+  font_size = 12,
+}
 config.window_close_confirmation = 'NeverPrompt'
-config.enable_tab_bar = false
+config.enable_tab_bar = true
+config.show_tabs_in_tab_bar = false
+config.show_new_tab_button_in_tab_bar = false
 
 return config
