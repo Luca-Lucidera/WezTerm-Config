@@ -21,13 +21,11 @@ wezterm.on('gui-startup', function(cmd)
   )
 end)
 
--- PowerShell 7 as default shell
 config.default_prog = { 'pwsh.exe', '-NoLogo' }
 
 local PS_CWD = [[D:\wkspaces]]
 local WSL_CWD = '/home/luca/code'
 
--- Startup window (local domain / default_prog)
 config.default_cwd = PS_CWD
 
 -- Patch the auto-generated domains so future distros keep working
@@ -63,12 +61,10 @@ config.keys = {
   { key = 'phys:1', mods = 'ALT|SHIFT', action = act.SpawnCommandInNewTab(config.launch_menu[1]) },
   { key = 'phys:2', mods = 'ALT|SHIFT', action = act.SpawnCommandInNewTab(config.launch_menu[2]) },
   { key = 'phys:E', mods = 'CTRL|SHIFT', action = act.ShowLauncher },
-  -- ALT+arrows cycle tabs (wraps at the ends)
   { key = 'LeftArrow', mods = 'ALT', action = act.ActivateTabRelative(-1) },
   { key = 'RightArrow', mods = 'ALT', action = act.ActivateTabRelative(1) },
 }
 
--- ALT+n switches tabs
 for i = 1, 9 do
   table.insert(config.keys, {
     key = 'phys:' .. i,
@@ -78,12 +74,12 @@ for i = 1, 9 do
 end
 
 -- color_scheme is global, so pick it from the focused pane's domain.
--- Both are built-ins sourced from mbadolato/iTerm2-Color-Schemes.
 -- The base16 variant is used because plain "rose-pine" sets selection_bg to its
 -- own background, making mouse selections invisible.
 local THEME_FOR_DOMAIN = { ['WSL:Debian'] = 'Rosé Pine (base16)' }
 local FALLBACK_THEME = 'nord'
 local SSH_THEME = 'Ef-Rosa'
+local TITLE_FONT = wezterm.font 'CaskaydiaCove Nerd Font'
 
 -- SSH detection: the process tree only works for local (PowerShell) panes;
 -- WSL internals are invisible to WezTerm, so there the ssh() wrapper in the
@@ -100,10 +96,27 @@ wezterm.on('update-status', function(window, pane)
   else
     scheme = THEME_FOR_DOMAIN[pane:get_domain_name()] or FALLBACK_THEME
   end
+
+  local tabs = window:mux_window():tabs_with_info()
+  local active_tab = 1
+  for _, tab in ipairs(tabs) do
+    if tab.is_active then
+      active_tab = tab.index + 1
+      break
+    end
+  end
+  window:set_left_status(string.format(
+    '  [%d/%d] %s',
+    active_tab,
+    #tabs,
+    pane:get_title()
+  ))
+
   local overrides = window:get_config_overrides() or {}
   -- only write on actual change, otherwise the reload event loops
-  if overrides.color_scheme ~= scheme then
+  if overrides.color_scheme ~= scheme or overrides.window_frame then
     overrides.color_scheme = scheme
+    overrides.window_frame = nil
     window:set_config_overrides(overrides)
   end
 end)
@@ -116,7 +129,7 @@ config.webgpu_power_preference = 'HighPerformance'
 config.window_decorations = 'INTEGRATED_BUTTONS | RESIZE'
 config.integrated_title_buttons = { 'Hide', 'Maximize' }
 config.window_frame = {
-  font = wezterm.font 'CaskaydiaCove Nerd Font',
+  font = TITLE_FONT,
   font_size = 12,
 }
 config.window_close_confirmation = 'NeverPrompt'
