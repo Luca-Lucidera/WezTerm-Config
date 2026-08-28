@@ -54,8 +54,7 @@ config.launch_menu = {
   },
 }
 
--- Lets TUIs that opt in (e.g. Claude Code) tell Shift+Enter from Enter
-config.enable_kitty_keyboard = true
+config.enable_kitty_keyboard = false
 
 config.keys = {
   { key = 'phys:1', mods = 'ALT|SHIFT', action = act.SpawnCommandInNewTab(config.launch_menu[1]) },
@@ -63,6 +62,7 @@ config.keys = {
   { key = 'phys:E', mods = 'CTRL|SHIFT', action = act.ShowLauncher },
   { key = 'LeftArrow', mods = 'ALT', action = act.ActivateTabRelative(-1) },
   { key = 'RightArrow', mods = 'ALT', action = act.ActivateTabRelative(1) },
+  { key = 'Enter', mods = 'SHIFT', action = act.SendString '\x1b\r' },
 }
 
 for i = 1, 9 do
