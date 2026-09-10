@@ -21,11 +21,10 @@ wezterm.on('gui-startup', function(cmd)
   )
 end)
 
-config.default_prog = { 'pwsh.exe', '-NoLogo' }
-
-local PS_CWD = [[D:\wkspaces]]
+local PS_CWD = 'D:\\'
 local WSL_CWD = '/home/luca/code'
 
+-- Fallback cwd for the local domain when a new pane has nothing to inherit
 config.default_cwd = PS_CWD
 
 -- Patch the auto-generated domains so future distros keep working
@@ -35,6 +34,9 @@ for _, dom in ipairs(config.wsl_domains) do
     dom.default_cwd = WSL_CWD
   end
 end
+
+-- New windows and tabs open in WSL; PowerShell stays reachable via the launch menu
+config.default_domain = 'WSL:Debian'
 
 -- Explicit "local" domain avoids WSL leaking into Windows tabs
 local LOCAL = { DomainName = 'local' }
