@@ -35,8 +35,8 @@ for _, dom in ipairs(config.wsl_domains) do
   end
 end
 
--- New windows and tabs open in WSL; PowerShell stays reachable via the launch menu
-config.default_domain = 'WSL:Debian'
+-- New windows and tabs open in Windows PowerShell; WSL stays reachable via the launch menu
+config.default_prog = { 'powershell.exe', '-NoLogo' }
 
 -- Explicit "local" domain avoids WSL leaking into Windows tabs
 local LOCAL = { DomainName = 'local' }
@@ -44,8 +44,8 @@ local WSL = { DomainName = 'WSL:Debian' }
 
 config.launch_menu = {
   {
-    label = 'PowerShell 7',
-    args = { 'pwsh.exe', '-NoLogo' },
+    label = 'Windows PowerShell',
+    args = { 'powershell.exe', '-NoLogo' },
     domain = LOCAL,
     cwd = PS_CWD,
   },
