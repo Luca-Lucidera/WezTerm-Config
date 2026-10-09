@@ -83,18 +83,34 @@ local FALLBACK_THEME = 'nord'
 local SSH_THEME = 'Ef-Rosa'
 local TITLE_FONT = wezterm.font 'CaskaydiaCove Nerd Font'
 
+-- claudio-box gets its own orange variant of Ef-Rosa's sibling Ef-Melissa-Dark,
+-- whose stock background is too brown to read as orange.
+local CLAUDIO_THEME = 'Ef-Melissa-Dark (claudio-box)'
+local claudio_scheme = wezterm.color.get_builtin_schemes()['Ef-Melissa-Dark']
+claudio_scheme.background = '#3a2410'
+config.color_schemes = { [CLAUDIO_THEME] = claudio_scheme }
+
 -- SSH detection: the process tree only works for local (PowerShell) panes;
 -- WSL internals are invisible to WezTerm, so there the ssh() wrapper in the
--- distro's ~/.bashrc raises the IS_SSH user var instead.
-local function is_ssh(proc, user_vars)
-  local exe = (proc or ''):match '[^/\\]+$'
-  return exe == 'ssh' or exe == 'ssh.exe' or user_vars.IS_SSH == '1'
+-- distro's ~/.zshrc publishes the destination as the SSH_HOST user var instead.
+-- Returns the destination (or whatever identifies it), nil when not in SSH.
+local function ssh_target(pane)
+  local host = pane:get_user_vars().SSH_HOST
+  if host and host ~= '' then
+    return host
+  end
+  local exe = (pane:get_foreground_process_name() or ''):match '[^/\\]+$'
+  if exe == 'ssh' or exe == 'ssh.exe' then
+    local info = pane:get_foreground_process_info()
+    return info and table.concat(info.argv, ' ', 2) or ''
+  end
 end
 
 wezterm.on('update-status', function(window, pane)
   local scheme
-  if is_ssh(pane:get_foreground_process_name(), pane:get_user_vars()) then
-    scheme = SSH_THEME
+  local target = ssh_target(pane)
+  if target then
+    scheme = target:lower():find('claudio-box', 1, true) and CLAUDIO_THEME or SSH_THEME
   else
     scheme = THEME_FOR_DOMAIN[pane:get_domain_name()] or FALLBACK_THEME
   end
