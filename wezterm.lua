@@ -87,13 +87,6 @@ local FALLBACK_THEME = 'nord'
 local SSH_THEME = 'Ef-Rosa'
 local TITLE_FONT = wezterm.font 'CaskaydiaCove Nerd Font'
 
--- claudio-box gets its own orange variant of Ef-Rosa's sibling Ef-Melissa-Dark,
--- whose stock background is too brown to read as orange.
-local CLAUDIO_THEME = 'Ef-Melissa-Dark (claudio-box)'
-local claudio_scheme = wezterm.color.get_builtin_schemes()['Ef-Melissa-Dark']
-claudio_scheme.background = '#3a2410'
-config.color_schemes = { [CLAUDIO_THEME] = claudio_scheme }
-
 -- SSH detection: the process tree only works for local (PowerShell) panes;
 -- WSL internals are invisible to WezTerm, so there the ssh() wrapper in the
 -- distro's ~/.zshrc publishes the destination as the SSH_HOST user var instead.
@@ -114,7 +107,10 @@ wezterm.on('update-status', function(window, pane)
   local scheme
   local target = ssh_target(pane)
   if target then
-    scheme = target:lower():find('claudio-box', 1, true) and CLAUDIO_THEME or SSH_THEME
+    -- claudio-box keeps WezTerm's built-in colors, i.e. no scheme at all
+    if not target:lower():find('claudio-box', 1, true) then
+      scheme = SSH_THEME
+    end
   else
     scheme = THEME_FOR_DOMAIN[pane:get_domain_name()] or FALLBACK_THEME
   end
